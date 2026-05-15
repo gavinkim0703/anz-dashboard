@@ -1,13 +1,13 @@
 {
   "tasks": [
     {
-      "pillarId": "corp",
+      "pillarId": "move",
       "title": "test",
       "owner": "Dan Casey",
       "priority": "Medium",
-      "status": "On Hold",
-      "progress": 20,
-      "dueDate": "2026-05-21",
+      "status": "In Progress",
+      "progress": 11,
+      "dueDate": "2026-05-20",
       "notes": "test",
       "sessionId": null,
       "id": 1
@@ -16,5 +16,5 @@
   "sessions": [],
   "nextTaskId": 2,
   "nextSessionId": 2,
-  "exportedAt": "2026-05-15T03:42:09.634Z"
+  "exportedAt": "2026-05-15T03:43:49.201Z"
 }
