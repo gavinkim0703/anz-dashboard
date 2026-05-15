@@ -201,22 +201,39 @@
       const [expandedSession,setExpandedSession]= useState(null);
       const importRef = useRef(null);
 
-      // Load from localStorage on mount (synchronous — no async needed)
+      // On GitHub Pages: fetch data.json (source of truth for all viewers).
+      // Locally (file:// protocol): fetch fails silently, falls back to localStorage.
       useEffect(() => {
-        const storedTasks      = load(STORAGE_KEY_TASKS);
-        const storedSessions   = load(STORAGE_KEY_SESSIONS);
-        const storedNextTask   = load(STORAGE_KEY_NEXT_TASK_ID);
-        const storedNextSession= load(STORAGE_KEY_NEXT_SESSION_ID);
-        const loadedSessions   = storedSessions ?? INIT_SESSIONS;
-        setTasks(storedTasks ?? []);
-        setSessions(loadedSessions);
-        setNextTaskId(storedNextTask ?? 1);
-        setNextSessionId(storedNextSession ?? 2);
-        if (loadedSessions.length > 0) {
-          const sorted = [...loadedSessions].sort((a,b) => b.date.localeCompare(a.date));
-          setExpandedSession(sorted[0].id);
-        }
-        setReady(true);
+        (async () => {
+          let serverData = null;
+          try {
+            const res = await fetch('./data.json?t=' + Date.now());
+            if (res.ok) {
+              const json = await res.json();
+              if (json && (Array.isArray(json.tasks) || Array.isArray(json.sessions))) {
+                serverData = json;
+              }
+            }
+          } catch(e) { /* file:// or network error — fall through to localStorage */ }
+
+          const source = serverData || {
+            tasks:         load(STORAGE_KEY_TASKS),
+            sessions:      load(STORAGE_KEY_SESSIONS),
+            nextTaskId:    load(STORAGE_KEY_NEXT_TASK_ID),
+            nextSessionId: load(STORAGE_KEY_NEXT_SESSION_ID),
+          };
+
+          const loadedSessions = source.sessions ?? INIT_SESSIONS;
+          setTasks(source.tasks ?? []);
+          setSessions(loadedSessions);
+          setNextTaskId(source.nextTaskId ?? 1);
+          setNextSessionId(source.nextSessionId ?? 2);
+          if (loadedSessions.length > 0) {
+            const sorted = [...loadedSessions].sort((a,b) => b.date.localeCompare(a.date));
+            setExpandedSession(sorted[0].id);
+          }
+          setReady(true);
+        })();
       }, []);
 
       useEffect(() => { if (ready) persist(STORAGE_KEY_TASKS,           tasks);         }, [tasks,         ready]);
