@@ -1,20 +1,436 @@
 {
   "tasks": [
     {
-      "pillarId": "move",
-      "title": "test",
-      "owner": "Dan Casey",
+      "pillarId": "corp",
+      "title": "Extend Cross‑sell Analysis to Corporate",
+      "owner": "Sue Johnston",
       "priority": "Medium",
-      "status": "In Progress",
-      "progress": 11,
-      "dueDate": "2026-05-20",
-      "notes": "test",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Sonia to connect with Corporate team\n- Share Enterprise whitespace analysis and adapt it for Corporate\n- Work aligns with Linda’s enterprise cross‑sell pillar",
       "sessionId": null,
-      "id": 1
+      "id": 2
+    },
+    {
+      "pillarId": "corp",
+      "title": "Build Pipeline Measurement Framework",
+      "owner": "Sue Johnston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Jeremy to coordinate with Sonia\n- Define measurement criteria for three key programs (e.g., Industry‑in‑a‑box, Blitz Days)\n- Cecilia to support with data extraction and modeling",
+      "sessionId": null,
+      "id": 3
+    },
+    {
+      "pillarId": "corp",
+      "title": "Update Business Plan & Growth Pillars",
+      "owner": "Sue Johnston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Refresh business plan and adjust growth pillars to align with 1.2B target\n- Incorporate feedback from Market Unit deck review",
+      "sessionId": null,
+      "id": 4
+    },
+    {
+      "pillarId": "corp",
+      "title": "Address Corporate Renewal & CDP Challenges",
+      "owner": "Sue Johnston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Raise issue with Catherine\n- Highlight churn risk caused by 1.2 CDP threshold and compensation impacts\n- Structural fix needed to avoid future renewal barriers",
+      "sessionId": null,
+      "id": 5
+    },
+    {
+      "pillarId": "corp",
+      "title": "Review High‑Value Accounts for Strategic Growth",
+      "owner": "Will Santry",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Assign review responsibility to Strategic Growth team\n- Evaluate the half‑dozen accounts where significant investment has already been made\n- These accounts are strong candidates for Will’s territory due to revenue size",
+      "sessionId": null,
+      "id": 6
+    },
+    {
+      "pillarId": "corp",
+      "title": "Initiate Campaign on Identified Accounts",
+      "owner": "Will Santry",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Will (or designated owner) to run a targeted campaign\n- Document findings and planned actions in shared notes\n- Latest email will be forwarded to support campaign planning",
+      "sessionId": null,
+      "id": 7
+    },
+    {
+      "pillarId": "corp",
+      "title": "Confirm Territory Assignment",
+      "owner": "Will Santry",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Leadership to approve territory alignment\n- Move accounts >250M revenue into Will’s territory\n- Approval may be required but team aligned on direction",
+      "sessionId": null,
+      "id": 8
+    },
+    {
+      "pillarId": "move",
+      "title": "Connect with Pierre for Data Alignment",
+      "owner": "Sally Kingston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Engage with Pierre to consolidate Move sheet insights and 2027 projections\n- Pierre already has deep involvement and relevant data",
+      "sessionId": null,
+      "id": 9
+    },
+    {
+      "pillarId": "move",
+      "title": "Share CIS Assessment Materials",
+      "owner": "Sally Kingston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Forward CIS potential assessment to Sally and Linda\n- Assessment covers all geographies including Corporate",
+      "sessionId": null,
+      "id": 10
+    },
+    {
+      "pillarId": "move",
+      "title": "Arrange CIS Specialist Session",
+      "owner": "Sally Kingston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Coordinate a CIS specialist to join an upcoming team meeting\n- Purpose is to explain CIS positioning, value, and usage",
+      "sessionId": null,
+      "id": 11
+    },
+    {
+      "pillarId": "move",
+      "title": "Maintain Pillar Scope Discipline",
+      "owner": "Sally Kingston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Limit pillar scope to max three initiatives; only include approved regional programs\n- Approved programs: Compatibility Pack, Match Success",
+      "sessionId": null,
+      "id": 12
+    },
+    {
+      "pillarId": "move",
+      "title": "Continue Move Account & Enterprise Account Focus",
+      "owner": "Sally Kingston",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Prioritize 50 Move accounts and 301 Enterprise accounts feeding into cross‑sell and expansion work\n- Critical for achieving the 1.2B target",
+      "sessionId": null,
+      "id": 13
+    },
+    {
+      "pillarId": "crosssell",
+      "title": "Review Data with Kevin and Rose",
+      "owner": "Linda Davis",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Sonia to work with Kevin and Rose through the heat map, whitespace analysis, and formulas\n- Meeting to occur next week; data must remain tightly controlled",
+      "sessionId": null,
+      "id": 14
+    },
+    {
+      "pillarId": "crosssell",
+      "title": "Prepare Dataset for Upsell Scenarios",
+      "owner": "Linda Davis",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Invert formulas and adapt analysis for upsell use cases\n- Supports broader GTM alignment and complements existing pillars",
+      "sessionId": null,
+      "id": 15
+    },
+    {
+      "pillarId": "crosssell",
+      "title": "Maintain Restricted Data Access",
+      "owner": "Linda Davis",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Ensure dataset is only shared with approved individuals\n- Leadership emphasized strict confidentiality",
+      "sessionId": null,
+      "id": 16
+    },
+    {
+      "pillarId": "crosssell",
+      "title": "Continue AI Pillar Development",
+      "owner": "Linda Davis",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Advance Inspire with AI initiatives and prepare updates for next session\n- AI pillar expected to align with SAPPHIRE announcements",
+      "sessionId": null,
+      "id": 17
+    },
+    {
+      "pillarId": "upsell",
+      "title": "Continue Development of Geo‑Level Dashboard",
+      "owner": "Kevin Angland",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Kevin and Rose to finalize and refine the GO‑level overconsumption dashboard for MU and territory leaders\n- Based on new APAC dataset; supports upsell pillar and leadership conversations",
+      "sessionId": null,
+      "id": 18
+    },
+    {
+      "pillarId": "upsell",
+      "title": "Integrate Dashboard into Updated Business Plan",
+      "owner": "Kevin Angland",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Align upsell pillar insights with the upcoming five‑program business plan structure\n- Consumption focus remains core; only packaging may change",
+      "sessionId": null,
+      "id": 19
+    },
+    {
+      "pillarId": "upsell",
+      "title": "Validate Controllable vs. Uncontrollable Metrics",
+      "owner": "Kevin Angland",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Identify which consumption metrics are influenceable and prioritize them in reporting\n- Helps address fairness concerns and improves performance focus",
+      "sessionId": null,
+      "id": 20
+    },
+    {
+      "pillarId": "largedeals",
+      "title": "Review Sovereign Cloud On‑Site Opportunities",
+      "owner": "Dan Getliffe",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Go through the list of sovereign cloud on‑site deals and contact the responsible teams to understand how each opportunity was structured\n- Includes deals in UK, South America, and others referenced in the last call",
+      "sessionId": null,
+      "id": 21
+    },
+    {
+      "pillarId": "largedeals",
+      "title": "Share Sovereign Cloud Documentation",
+      "owner": "Brian Senior",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Provide Dan with the document containing sovereign cloud opportunity details\n- Enables Dan to begin outreach and analysis",
+      "sessionId": null,
+      "id": 22
+    },
+    {
+      "pillarId": "largedeals",
+      "title": "Form a Small Working Group",
+      "owner": "Dan Getliffe",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Organize a 2‑day workshop with a small group to brainstorm and build a structured plan\n- Workshop intended to accelerate progress beyond fortnightly meetings",
+      "sessionId": null,
+      "id": 23
+    },
+    {
+      "pillarId": "largedeals",
+      "title": "Engage Key Internal and External Contributors",
+      "owner": "Dan Getliffe",
+      "priority": "Medium",
+      "status": "Pending",
+      "progress": 0,
+      "dueDate": "2026-05-21",
+      "notes": "- Connect with Murray Bush and external partner Chris Vaz (KPMG) to validate ideas and explore collaboration\n- Chris has APAC sales role and experience architecting major initiatives (e.g., QRO tax insights)",
+      "sessionId": null,
+      "id": 24
     }
   ],
-  "sessions": [],
-  "nextTaskId": 2,
-  "nextSessionId": 2,
-  "exportedAt": "2026-05-15T03:43:49.201Z"
+  "sessions": [
+    {
+      "date": "2026-05-07",
+      "title": "ANZ Fortnightly Cadence — Corp Field, Partner Driven and Next Gen Accounts",
+      "summary": "- Leadership discussions following SAPPHIRE and APAC meetings highlighted the need to update the business plan and potentially reframe growth pillars.\n- The organization is targeting 1.2B cloud revenue within four years, requiring stronger inorganic growth initiatives.\n- Cross‑sell, Move, and LoB campaigns remain critical, but require better programmatic management and measurable pipeline tracking.\n- Corporate segment faces renewal and churn risks due to 5‑year contract cycles and the 1.2 CDP threshold.\n- Enterprise cross‑sell analysis work can be extended to Corporate to improve whitespace visibility and prioritization.\n- Collaboration across Sales, SDR, Analytics, and leadership teams is essential to move the dial.",
+      "keyPoints": [
+        "Post‑SAPPHIRE and APAC leadership updates Market Unit deck submitted; positive feedback received. Business plan refresh underway, including potential pillar rebranding.",
+        "Growth target reaffirmed From 499M cloud revenue to 1.2B by end of decade (4 years remaining). Need for strategic, non‑day‑to‑day initiatives to accelerate growth.",
+        "Programmatic management of Move & Cross‑sell Two‑stream model: Sales handles install‑base priorities. SDRs support outreach and qualification for expansion opportunities. Sales may reuse SDR‑created assets.",
+        "Data gaps in cross‑sell Current approach relies on team intuition. Enterprise team (Linda, Sonia) has strong whitespace analysis that can be adapted for Corporate.",
+        "Corporate renewal challenges Many 5‑year contracts approaching renewal. 1.2 CDP threshold creates structural barriers. Some deals require taking a compensation hit to prevent churn.",
+        "Need for measurable pipeline tracking Industry‑in‑a‑box, Blitz Days, and other initiatives require clear pipeline representation. Cecilia can support with data and analytics."
+      ],
+      "decisions": [
+        "Business plan will be updated and growth pillars may be rebranded.",
+        "Enterprise cross‑sell analysis will be extended to Corporate.",
+        "Sonia will connect with Corporate team to share whitespace and pipeline insights.",
+        "Pipeline measurement framework will be developed for key programs.",
+        "Cecilia will support Corporate analytics needs."
+      ],
+      "actionItems": [
+        "Extend Cross‑sell Analysis to Corporate ",
+        "Build Pipeline Measurement Framework",
+        "Update Business Plan & Growth Pillars",
+        "Address Corporate Renewal & CDP Challenges"
+      ],
+      "id": 2
+    },
+    {
+      "date": "2026-05-07",
+      "title": "ANZ Fortnightly Cadence — Corp Field, Partner Driven and Next Gen Accounts",
+      "summary": "- Discussion centered on several active deals (AirTrunk, HCM + LeanIX, HCM RFP) and the key challenge being resource constraints rather than budget.\n- Strategic Growth team should review a small set of high‑value accounts where significant investment has already been made.\n- Proposal to run a targeted campaign on these accounts and assign them to Will’s territory due to revenue size (>250M).\n- Agreement to document actions, align territories, and move forward with campaign execution.\n- Team acknowledged strong progress in the call and emphasized the need to complete action items by end of next week.",
+      "keyPoints": [
+        "Multiple deals in progress (AirTrunk, HCM + LeanIX, HCM RFP)",
+        "Customer feedback: “Money is not the problem; people are the problem.”",
+        "Strategic Growth team should evaluate a small group of accounts where investment has already occurred.",
+        "Suggestion that these accounts ideally sit in Will’s territory due to size and strategic relevance.",
+        "Need for someone to run a campaign on these accounts and document planned actions.",
+        "Approval may be required to formally assign these accounts to the appropriate territory.",
+        "Recognition that more topics remain but will be addressed in the next session."
+      ],
+      "decisions": [
+        "Strategic Growth team will review the identified high‑value accounts.",
+        "These accounts should likely be placed under Will’s territory (>250M revenue).",
+        "A campaign will be initiated for these accounts once ownership is confirmed."
+      ],
+      "actionItems": [
+        "Review High‑Value Accounts for Strategic Growth",
+        "Initiate Campaign on Identified Accounts",
+        "Confirm Territory Assignment"
+      ],
+      "id": 3
+    },
+    {
+      "date": "2026-05-07",
+      "title": "ANZ Fortnightly Cadence — MOVE",
+      "summary": "- Sally has been reviewing and validating the Move sheets with Sonia, noting data integrity challenges due to multiple data sources.\n- A 2027 view has been created to support longer‑term planning.\n- Discussion highlighted the importance of connecting with Pierre, who is deeply involved in the related analysis.\n- Introduction of the Customer Innovation Services (CIS) framework, now a mandatory touchpoint for every deal.\n- Rudy confirmed CIS assessments have already been completed across all geographies and can be shared with the team.\n- Leadership emphasized limiting pillar scope to no more than three initiatives, with only regional programs allowed to be added.\n- Focus remains on activities that “move the dial” toward the 1.2B growth target.",
+      "keyPoints": [
+        "Sally and Sonia are aligning Move sheet data and validating accuracy across multiple sources. ",
+        "CIS (Customer Innovation Services) is now a mandatory component in all deals. Rudy shared that a full CIS potential assessment has already been completed and distributed to geo leaders. CIS specialists can join team meetings to explain positioning and usage.",
+        "Leadership stressed that only two regional programs are approved for the year: Compatibility Pack Match Success Everything else is considered business‑as‑usual and should not be added to pillar scope.",
+        "Emphasis on focusing efforts on the 50 Move accounts and 301 Enterprise accounts feeding into Linda’s work.",
+        "Focus remains on high‑impact accounts and activities tied to the 1.2B target."
+      ],
+      "decisions": [
+        "Sally and Sonia will continue refining Move sheet data and long‑term projections. Team will connect with Pierre to align data and insights.",
+        "CIS assessment materials will be shared with Sally and Linda. CIS specialists may be invited to future team meetings.",
+        "No additional initiatives will be added to pillar scope unless they are approved regional programs."
+      ],
+      "actionItems": [
+        "Connect with Pierre for Data Alignment",
+        "Share CIS Assessment Materials",
+        "Arrange CIS Specialist Session",
+        "Maintain Pillar Scope Discipline",
+        "Continue Move Account & Enterprise Account Focus"
+      ],
+      "id": 4
+    },
+    {
+      "date": "2026-05-07",
+      "title": "ANZ Fortnightly Cadence — Cross Sell",
+      "summary": "- Linda provided updates on the three strategic focus areas: Solving Industry Challenges, Inspire with AI, and Targeted LoB Plays.\n- Sonia has completed significant analytical work, producing a heat map and whitespace analysis by industry, geo, and sub‑solution area.\n- AI‑related initiatives are progressing, with Linda spending most of her time on this pillar.\n- Sonia’s dataset will serve as the core engine for all three pillars, including future upsell work.\n- Leadership emphasized the need to protect the data, limit distribution, and maintain tight control.\n- Coordination between Sonia, Kevin, and Rose is required to extend the analysis for upsell scenarios.\n- Strong recognition of progress made across the two‑hour session and alignment with upcoming SAPPHIRE themes.",
+      "keyPoints": [
+        "Three focus areas remain unchanged: Solving Industry Challenges Inspire with AI Targeted LoB Plays",
+        "Sonia’s work includes: Heat maps by sub‑solution area Whitespace by industry and geo Data foundation for LoB and AI plays",
+        "AI pillar is advancing; Linda has been heavily focused on this area.",
+        "Sonia’s analysis can be inverted to support upsell opportunities. Need for Sonia to walk Kevin and Rose through the dataset and methodology."
+      ],
+      "decisions": [
+        "Sonia’s dataset will be the primary data source for all three pillars.",
+        "Sonia will meet with Kevin and Rose next week to review the analysis.",
+        "Data access will remain restricted to a small group (Linda, Jeremy, Sonia).",
+        "The three pillars (Industry, AI, LoB) will form the go‑to‑market structure."
+      ],
+      "actionItems": [
+        "Review Data with Kevin and Rose",
+        "Prepare Dataset for Upsell Scenarios",
+        "Maintain Restricted Data Access",
+        "Continue AI Pillar Development"
+      ],
+      "id": 5
+    },
+    {
+      "date": "2026-05-07",
+      "title": "ANZ Fortnightly Cadence — Up Sell",
+      "summary": "- Kevin provided an update on the Upsell Pillar, including progress made since the Bangkok meetings.\n- The business plan is being updated, with six pillars likely being consolidated into five key programs, but the consumption‑focused upsell pillar remains fully relevant.\n- Kevin and Rose have been working on transforming APAC overconsumption data into a geo‑level dashboard for market unit and territory leaders.\n- New datasets from APAC (as of end‑March) have been re‑oriented to support more meaningful conversations at the GO level.\n- Discussion included the distinction between controllable vs. non‑controllable consumption metrics and how to focus on influenceable areas.\n- Leadership acknowledged strong progress and alignment with the broader GTM direction.",
+      "keyPoints": [
+        "Business plan refresh underway; six pillars will likely be recut into five programs. Upsell pillar remains intact, with all three initiatives still relevant.",
+        "Kevin and Rose have been restructuring APAC overconsumption data into a geo‑level dashboard. Dashboard aims to support: Market unit leadership Territory leaders GO‑level conversations",
+        "APAC dataset previously only showed Australia as a single line; now expanded into detailed tables.",
+        "Discussion on controllable vs. uncontrollable consumption metrics and how teams perceive fairness.",
+        "Emphasis on identifying where the organization can “move the dial” through influenceable levers."
+      ],
+      "decisions": [
+        "Upsell pillar will continue unchanged, though it may be repackaged within the new five‑program structure.",
+        "Kevin’s geo‑level dashboard approach will be used to support MU and territory conversations.",
+        "Rose’s work on data transformation will continue to underpin the upsell pillar.",
+        "Focus will remain on influenceable consumption metrics rather than uncontrollable factors."
+      ],
+      "actionItems": [
+        "Continue Development of Geo‑Level Dashboard",
+        "Integrate Dashboard into Updated Business Plan",
+        "Validate Controllable vs. Uncontrollable Metrics"
+      ],
+      "id": 6
+    },
+    {
+      "date": "2026-05-07",
+      "title": "ANZ Fortnightly Cadence — Large Deals",
+      "summary": "- Dan provided an update on sovereign cloud and global pipeline visibility, referencing recent discussions with Brian and APAC teams.\n- There is a need to better understand large global sovereign cloud on‑site opportunities (tens or hundreds of millions) and how they were structured.\n- Agreement that the team should proactively reach out to global teams managing these deals to understand the “why” and “how” behind them.\n- Leadership emphasized the importance of forming a small working group to brainstorm and build a structured plan instead of relying solely on fortnightly updates.\n- Potential involvement of external partners (e.g., KPMG’s Chris Vaz) and internal leaders (e.g., Murray Bush) to validate ideas and accelerate progress.",
+      "keyPoints": [
+        "Dan and Brian discussed visibility into global sovereign cloud on‑site opportunities.",
+        "Sovereign cloud on‑site requires significant SAP investment and anchor tenants; understanding the model is essential.",
+        "Suggested forming a focused 2‑day workshop with a small group to accelerate ideation and planning.",
+        "Murray Bush identified as a strong internal contributor with broad visibility.",
+        "Chris Vaz (KPMG) highlighted as a valuable external partner with relevant experience (e.g., QRO tax insights, digitised public infrastructure).",
+        "Possibility of bringing in multiple partners over two days to brainstorm solutions and validate approaches."
+      ],
+      "decisions": [
+        "Dan and Brian will review the sovereign cloud on‑site opportunities list and engage the relevant teams.",
+        "A small working group will be formed to spend dedicated time brainstorming and shaping a plan.",
+        "External partners (e.g., KPMG) may be included in the ideation process.",
+        "Fortnightly meetings will continue, but deeper workshops are required to accelerate progress."
+      ],
+      "actionItems": [
+        "Review Sovereign Cloud On‑Site Opportunities",
+        "Share Sovereign Cloud Documentation",
+        "Form a Small Working Group",
+        "Engage Key Internal and External Contributors"
+      ],
+      "id": 7
+    }
+  ],
+  "nextTaskId": 25,
+  "nextSessionId": 8,
+  "exportedAt": "2026-05-17T16:05:04.898Z"
 }
