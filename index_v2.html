@@ -60,11 +60,13 @@
       });
       if (!r.ok) throw new Error(r.status);
       const j = await r.json();
-      return { data: JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, ''))))), sha: j.sha };
+      const bytes = Uint8Array.from(atob(j.content.replace(/\n/g,'')), c => c.charCodeAt(0));
+      return { data: JSON.parse(new TextDecoder('utf-8').decode(bytes)), sha: j.sha };
     }
     async function ghWrite(data, sha) {
       const body = JSON.stringify(data, null, 2);
-      const encoded = btoa(unescape(encodeURIComponent(body)));
+      const bytes = new TextEncoder().encode(body);
+      const encoded = btoa(String.fromCharCode(...bytes));
       const r = await fetch(GH_API, {
         method: 'PUT',
         headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
