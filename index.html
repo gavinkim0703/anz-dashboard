@@ -25,7 +25,8 @@
       { id: "largedeals", label: "Large Deals",   subtitle: "",                                   color: "#D97706", light: "#FEF3C7", dark: "#78350F", owners: ["Dan Getliffe","Brian Senior"] },
     ];
 
-    const ALL_OWNERS  = ["Dan Casey","Sue Johnston","Audrey Sleaford","Will Santry","Sally Kingston","Linda Davis","Kevin Angland","Dan Getliffe","Brian Senior"];
+    const DEFAULT_OWNERS = ["Dan Casey","Sue Johnston","Audrey Sleaford","Will Santry","Sally Kingston","Linda Davis","Kevin Angland","Dan Getliffe","Brian Senior"];
+    const DEFAULT_PILLAR_OWNERS = { corp:["Dan Casey","Sue Johnston","Audrey Sleaford","Will Santry"], move:["Sally Kingston"], crosssell:["Linda Davis"], upsell:["Kevin Angland"], largedeals:["Dan Getliffe","Brian Senior"] };
     const PRIORITIES  = ["Critical","High","Medium","Low"];
     const STATUSES    = ["Pending","In Progress","On Hold","Resolved"];
     const PRIORITY_META = { Critical:{bg:"#FEE2E2",text:"#991B1B",dot:"#EF4444"}, High:{bg:"#FEF3C7",text:"#92400E",dot:"#F59E0B"}, Medium:{bg:"#DBEAFE",text:"#1E40AF",dot:"#3B82F6"}, Low:{bg:"#D1FAE5",text:"#065F46",dot:"#10B981"} };
@@ -36,6 +37,8 @@
     const STORAGE_KEY_SESSIONS       = "anz_sessions";
     const STORAGE_KEY_NEXT_TASK_ID   = "anz_next_task_id";
     const STORAGE_KEY_NEXT_SESSION_ID = "anz_next_session_id";
+    const STORAGE_KEY_OWNERS         = "anz_owners";
+    const STORAGE_KEY_PILLAR_OWNERS  = "anz_pillar_owners";
 
     const INIT_SESSIONS = [{ id:1, date:today, title:"ANZ Fortnightly Cadence — Session 1", summary:"", keyPoints:[""], decisions:[""], actionItems:[""] }];
 
@@ -45,6 +48,33 @@
     }
     function load(key) {
       try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+    }
+
+    // ─── SharePoint REST API ─────────────────────────────────────────────────────
+    const SP_SITE    = 'https://sap.sharepoint.com/teams/ANZFortnightlyCadence';
+    const SP_FILE_ID = '6fb1d590-1b0e-4866-afab-2e91918df428';
+
+    async function spRead() {
+      const r = await fetch(`${SP_SITE}/_api/web/GetFileById('${SP_FILE_ID}')/$value`, {
+        credentials: 'include', headers: { Accept: 'application/json' }
+      });
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }
+    async function spWrite(data) {
+      const dr = await fetch(`${SP_SITE}/_api/contextinfo`, {
+        method: 'POST', credentials: 'include',
+        headers: { Accept: 'application/json;odata=verbose', 'Content-Type': 'application/json;odata=verbose' }
+      });
+      if (!dr.ok) throw new Error('digest ' + dr.status);
+      const dj = await dr.json();
+      const digest = dj.d.GetContextWebInformation.FormDigestValue;
+      const r = await fetch(`${SP_SITE}/_api/web/GetFileById('${SP_FILE_ID}')/$value`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'X-RequestDigest': digest, 'X-HTTP-Method': 'PUT', 'Content-Type': 'application/json' },
+        body: JSON.stringify(data, null, 2)
+      });
+      if (!r.ok) throw new Error(r.status);
     }
 
     // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -72,9 +102,10 @@
     const inputStyle = { width:"100%", border:"1.5px solid #E2E8F0", borderRadius:8, padding:"8px 12px", fontSize:13, color:"#0F172A", fontFamily:"inherit", boxSizing:"border-box", outline:"none", background:"#F8FAFC" };
     const labelStyle = { display:"block", fontSize:11, fontWeight:700, color:"#64748B", marginBottom:5, textTransform:"uppercase", letterSpacing:"0.05em" };
 
-    function TaskModal({ task, onSave, onClose }) {
+    function TaskModal({ task, allOwners, onSave, onClose }) {
+      const ownerList = allOwners || DEFAULT_OWNERS;
       const isNew = !task;
-      const [form, setForm] = useState(task ? {...task} : { pillarId:PILLARS[0].id, title:"", owner:ALL_OWNERS[0], priority:"Medium", status:"Pending", progress:0, dueDate:"", notes:"", sessionId:null });
+      const [form, setForm] = useState(task ? {...task} : { pillarId:PILLARS[0].id, title:"", owner:ownerList[0]||"", priority:"Medium", status:"Pending", progress:0, dueDate:"", notes:"", sessionId:null });
       const set = (k,v) => setForm(f => ({...f,[k]:v}));
       const pillar = PILLARS.find(p => p.id===form.pillarId);
       return (
@@ -99,7 +130,7 @@
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:14 }}>
               <div><label style={labelStyle}>Owner</label>
-                <select value={form.owner} onChange={e => set("owner",e.target.value)} style={inputStyle}>{ALL_OWNERS.map(o => <option key={o}>{o}</option>)}</select>
+                <select value={form.owner} onChange={e => set("owner",e.target.value)} style={inputStyle}>{ownerList.map(o => <option key={o}>{o}</option>)}</select>
               </div>
               <div><label style={labelStyle}>Priority</label>
                 <select value={form.priority} onChange={e => set("priority",e.target.value)} style={inputStyle}>{PRIORITIES.map(p => <option key={p}>{p}</option>)}</select>
@@ -182,6 +213,93 @@
       );
     }
 
+    function PeopleModal({ owners, pillarOwners, onSave, onClose }) {
+      const [people, setPeople] = useState([...owners]);
+      const [pOwners, setPOwners] = useState({...pillarOwners});
+      const [newName, setNewName] = useState('');
+
+      const addPerson = () => {
+        const name = newName.trim();
+        if (!name || people.includes(name)) return;
+        setPeople(p => [...p, name]);
+        setNewName('');
+      };
+      const removePerson = (name) => {
+        setPeople(p => p.filter(x => x !== name));
+        setPOwners(po => {
+          const updated = {};
+          PILLARS.forEach(p => { updated[p.id] = (po[p.id]||[]).filter(x => x !== name); });
+          return updated;
+        });
+      };
+      const togglePillarOwner = (pillarId, name) => {
+        setPOwners(po => {
+          const cur = po[pillarId] || [];
+          return { ...po, [pillarId]: cur.includes(name) ? cur.filter(x=>x!==name) : [...cur, name] };
+        });
+      };
+
+      return (
+        <div style={{ position:"fixed", inset:0, background:"rgba(15,23,42,0.6)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }}>
+          <div style={{ background:"#fff", borderRadius:18, padding:"28px 32px", width:560, maxWidth:"95vw", maxHeight:"90vh", overflowY:"auto" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:22 }}>
+              <h3 style={{ margin:0, fontSize:17, fontWeight:800, color:"#0F172A" }}>Manage People</h3>
+              <button onClick={onClose} style={{ border:"none", background:"none", cursor:"pointer", fontSize:22, color:"#94A3B8" }}>×</button>
+            </div>
+
+            <div style={{ marginBottom:20 }}>
+              <label style={labelStyle}>Add New Person</label>
+              <div style={{ display:"flex", gap:8 }}>
+                <input value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addPerson()} placeholder="Full name..." style={{ ...inputStyle, flex:1 }} />
+                <button onClick={addPerson} style={{ background:"#1D4ED8", color:"#fff", border:"none", borderRadius:8, padding:"8px 16px", fontWeight:700, cursor:"pointer", whiteSpace:"nowrap" }}>+ Add</button>
+              </div>
+            </div>
+
+            <div style={{ marginBottom:20 }}>
+              <label style={labelStyle}>All People</label>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+                {people.map(name => (
+                  <div key={name} style={{ display:"flex", alignItems:"center", gap:6, background:"#F1F5F9", borderRadius:20, padding:"4px 10px 4px 8px" }}>
+                    <Avatar name={name} size={20} />
+                    <span style={{ fontSize:13, fontWeight:600, color:"#0F172A" }}>{name}</span>
+                    <button onClick={()=>removePerson(name)} style={{ border:"none", background:"none", cursor:"pointer", color:"#94A3B8", fontSize:14, lineHeight:1, padding:"0 2px" }}>×</button>
+                  </div>
+                ))}
+                {people.length===0 && <p style={{ color:"#CBD5E1", fontSize:13, margin:0 }}>No people added yet.</p>}
+              </div>
+            </div>
+
+            <div style={{ marginBottom:24 }}>
+              <label style={labelStyle}>Pillar Owners</label>
+              {PILLARS.map(p => (
+                <div key={p.id} style={{ marginBottom:12 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                    <div style={{ width:10, height:10, borderRadius:2, background:p.color }} />
+                    <span style={{ fontSize:12, fontWeight:700, color:"#475569" }}>{p.label}</span>
+                  </div>
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:6, paddingLeft:18 }}>
+                    {people.map(name => {
+                      const selected = (pOwners[p.id]||[]).includes(name);
+                      return (
+                        <button key={name} onClick={()=>togglePillarOwner(p.id,name)} style={{ border:`1.5px solid ${selected?p.color:'#E2E8F0'}`, borderRadius:20, padding:"3px 10px", background:selected?p.color+'15':'#fff', cursor:"pointer", fontSize:12, fontWeight:600, color:selected?p.dark:'#64748B' }}>
+                          {name.split(' ')[0]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:"flex", gap:10 }}>
+              <button onClick={()=>onSave(people, pOwners)} style={{ flex:1, background:"#1D4ED8", color:"#fff", border:"none", borderRadius:10, padding:"12px 0", fontWeight:800, fontSize:14, cursor:"pointer" }}>Save Changes</button>
+              <button onClick={onClose} style={{ padding:"12px 20px", border:"1.5px solid #E2E8F0", borderRadius:10, background:"none", cursor:"pointer", color:"#64748B" }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // ─── Main App ─────────────────────────────────────────────────────────────────
 
     function ANZDashboard() {
@@ -199,40 +317,41 @@
       const [deleteTaskId,   setDeleteTaskId]   = useState(null);
       const [deleteSessionId,setDeleteSessionId]= useState(null);
       const [expandedSession,setExpandedSession]= useState(null);
-      const importRef = useRef(null);
+      const importRef   = useRef(null);
+      const [syncStatus, setSyncStatus] = useState('loading');
+      const latestRef   = useRef(null);
+      const [owners,       setOwners]       = useState(DEFAULT_OWNERS);
+      const [pillarOwners, setPillarOwners] = useState(DEFAULT_PILLAR_OWNERS);
+      const [peopleModal,  setPeopleModal]  = useState(false);
 
-      // On GitHub Pages: fetch data.json (source of truth for all viewers).
-      // Locally (file:// protocol): fetch fails silently, falls back to localStorage.
       useEffect(() => {
         (async () => {
-          let serverData = null;
-          try {
-            const res = await fetch('./data.json?t=' + Date.now());
-            if (res.ok) {
-              const json = await res.json();
-              if (json && (Array.isArray(json.tasks) || Array.isArray(json.sessions))) {
-                serverData = json;
-              }
-            }
-          } catch(e) { /* file:// or network error — fall through to localStorage */ }
-
-          const source = serverData || {
-            tasks:         load(STORAGE_KEY_TASKS),
-            sessions:      load(STORAGE_KEY_SESSIONS),
-            nextTaskId:    load(STORAGE_KEY_NEXT_TASK_ID),
-            nextSessionId: load(STORAGE_KEY_NEXT_SESSION_ID),
+          let data = null;
+          try { data = await spRead(); } catch(e) {}
+          if (!data) {
+            try {
+              const res = await fetch('./data.json?t=' + Date.now());
+              if (res.ok) { const j = await res.json(); if (j && (Array.isArray(j.tasks)||Array.isArray(j.sessions))) data = j; }
+            } catch(e) {}
+          }
+          const source = data || {
+            tasks: load(STORAGE_KEY_TASKS), sessions: load(STORAGE_KEY_SESSIONS),
+            nextTaskId: load(STORAGE_KEY_NEXT_TASK_ID), nextSessionId: load(STORAGE_KEY_NEXT_SESSION_ID),
+            owners: load(STORAGE_KEY_OWNERS), pillarOwners: load(STORAGE_KEY_PILLAR_OWNERS),
           };
-
           const loadedSessions = source.sessions ?? INIT_SESSIONS;
           setTasks(source.tasks ?? []);
           setSessions(loadedSessions);
           setNextTaskId(source.nextTaskId ?? 1);
           setNextSessionId(source.nextSessionId ?? 2);
+          if (source.owners) setOwners(source.owners);
+          if (source.pillarOwners) setPillarOwners(source.pillarOwners);
           if (loadedSessions.length > 0) {
             const sorted = [...loadedSessions].sort((a,b) => b.date.localeCompare(a.date));
             setExpandedSession(sorted[0].id);
           }
           setReady(true);
+          setSyncStatus(data ? 'synced' : 'offline');
         })();
       }, []);
 
@@ -240,11 +359,43 @@
       useEffect(() => { if (ready) persist(STORAGE_KEY_SESSIONS,        sessions);      }, [sessions,      ready]);
       useEffect(() => { if (ready) persist(STORAGE_KEY_NEXT_TASK_ID,    nextTaskId);    }, [nextTaskId,    ready]);
       useEffect(() => { if (ready) persist(STORAGE_KEY_NEXT_SESSION_ID, nextSessionId); }, [nextSessionId, ready]);
+      useEffect(() => { if (ready) persist(STORAGE_KEY_OWNERS,          owners);        }, [owners,        ready]);
+      useEffect(() => { if (ready) persist(STORAGE_KEY_PILLAR_OWNERS,   pillarOwners);  }, [pillarOwners,  ready]);
+
+      useEffect(() => { if (ready) latestRef.current = { tasks, sessions, nextTaskId, nextSessionId, owners, pillarOwners }; }, [tasks, sessions, nextTaskId, nextSessionId, owners, pillarOwners, ready]);
+
+      useEffect(() => {
+        if (!ready) return;
+        const poll = async () => {
+          try {
+            const remote = await spRead();
+            if (!remote || typeof remote !== 'object') return;
+            const cur = JSON.stringify(latestRef.current);
+            const inc = JSON.stringify({ tasks: remote.tasks, sessions: remote.sessions, nextTaskId: remote.nextTaskId, nextSessionId: remote.nextSessionId });
+            if (cur !== inc) {
+              if (Array.isArray(remote.tasks))    setTasks(remote.tasks);
+              if (Array.isArray(remote.sessions)) setSessions(remote.sessions);
+              if (remote.nextTaskId)    setNextTaskId(remote.nextTaskId);
+              if (remote.nextSessionId) setNextSessionId(remote.nextSessionId);
+              if (Array.isArray(remote.owners))   setOwners(remote.owners);
+              if (remote.pillarOwners)            setPillarOwners(remote.pillarOwners);
+            }
+            setSyncStatus('synced');
+          } catch(e) { setSyncStatus('offline'); }
+        };
+        const id = setInterval(poll, 30000);
+        return () => clearInterval(id);
+      }, [ready]);
+
+      const writeToSP = (data) => {
+        setSyncStatus('syncing');
+        spWrite(data).then(() => setSyncStatus('synced')).catch(() => setSyncStatus('error'));
+      };
 
       // ── Export / Import ──────────────────────────────────────────────────────────
 
       const exportJSON = () => {
-        const data = { tasks, sessions, nextTaskId, nextSessionId, exportedAt: new Date().toISOString() };
+        const data = { tasks, sessions, nextTaskId, nextSessionId, owners, pillarOwners, exportedAt: new Date().toISOString() };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement("a");
@@ -286,6 +437,8 @@
             if (Array.isArray(data.sessions)) setSessions(data.sessions);
             if (data.nextTaskId)    setNextTaskId(data.nextTaskId);
             if (data.nextSessionId) setNextSessionId(data.nextSessionId);
+            if (Array.isArray(data.owners))   setOwners(data.owners);
+            if (data.pillarOwners)            setPillarOwners(data.pillarOwners);
             alert("Data imported successfully!");
           } catch {
             alert("Import failed: the file is not a valid ANZ dashboard JSON backup.");
@@ -298,26 +451,55 @@
       // ── Task / Session CRUD ──────────────────────────────────────────────────────
 
       const saveTask = (form) => {
+        let newTasks, newNextTaskId = nextTaskId;
         if (taskModal === "new") {
-          const id = nextTaskId;
-          setTasks(t => [...t, {...form, id}]);
-          setNextTaskId(n => n+1);
+          newTasks = [...tasks, {...form, id: nextTaskId}];
+          newNextTaskId = nextTaskId + 1;
+          setTasks(newTasks);
+          setNextTaskId(newNextTaskId);
         } else {
-          setTasks(t => t.map(x => x.id===form.id ? form : x));
+          newTasks = tasks.map(x => x.id===form.id ? form : x);
+          setTasks(newTasks);
         }
         setTaskModal(null);
+        writeToSP({ tasks: newTasks, sessions, nextTaskId: newNextTaskId, nextSessionId, owners, pillarOwners });
       };
 
       const saveSession = (form) => {
+        let newSessions, newNextSessId = nextSessionId;
         if (sessionModal === "new") {
-          const id = nextSessionId;
-          setSessions(s => [...s, {...form, id}]);
-          setNextSessionId(n => n+1);
-          setExpandedSession(id);
+          newSessions = [...sessions, {...form, id: nextSessionId}];
+          newNextSessId = nextSessionId + 1;
+          setSessions(newSessions);
+          setNextSessionId(newNextSessId);
+          setExpandedSession(nextSessionId);
         } else {
-          setSessions(s => s.map(x => x.id===form.id ? form : x));
+          newSessions = sessions.map(x => x.id===form.id ? form : x);
+          setSessions(newSessions);
         }
         setSessionModal(null);
+        writeToSP({ tasks, sessions: newSessions, nextTaskId, nextSessionId: newNextSessId, owners, pillarOwners });
+      };
+
+      const deleteTask = (id) => {
+        const newTasks = tasks.filter(x => x.id !== id);
+        setTasks(newTasks);
+        setDeleteTaskId(null);
+        writeToSP({ tasks: newTasks, sessions, nextTaskId, nextSessionId, owners, pillarOwners });
+      };
+
+      const savePeople = (newOwners, newPillarOwners) => {
+        setOwners(newOwners);
+        setPillarOwners(newPillarOwners);
+        setPeopleModal(false);
+        writeToSP({ tasks, sessions, nextTaskId, nextSessionId, owners: newOwners, pillarOwners: newPillarOwners });
+      };
+
+      const deleteSession = (id) => {
+        const newSessions = sessions.filter(x => x.id !== id);
+        setSessions(newSessions);
+        setDeleteSessionId(null);
+        writeToSP({ tasks, sessions: newSessions, nextTaskId, nextSessionId, owners, pillarOwners });
       };
 
       const filteredTasks = tasks.filter(t =>
@@ -370,6 +552,13 @@
             <div style={{ display:"flex", gap:8, alignItems:"center" }}>
               {latestSession && <span style={{ fontSize:12, color:"#475569" }}>Last: {new Date(latestSession.date).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})}</span>}
 
+              <span title="SharePoint sync status" style={{ fontSize:11, fontWeight:700, padding:"4px 10px", borderRadius:20, whiteSpace:"nowrap",
+                background: syncStatus==='synced'?'#D1FAE5': syncStatus==='syncing'?'#FEF3C7': syncStatus==='error'?'#FEE2E2': syncStatus==='offline'?'#F1F5F9':'#1E293B',
+                color:      syncStatus==='synced'?'#065F46': syncStatus==='syncing'?'#78350F': syncStatus==='error'?'#991B1B': syncStatus==='offline'?'#475569':'#94A3B8'
+              }}>
+                {syncStatus==='synced'?'✓ Synced': syncStatus==='syncing'?'↑ Syncing…': syncStatus==='error'?'⚠ Sync Error': syncStatus==='offline'?'◌ Offline':'◌ Loading'}
+              </span>
+
               {/* Data buttons */}
               <button onClick={exportJSON} title="Export all data to JSON backup" style={{ background:"#1E293B", color:"#94A3B8", border:"1px solid #334155", borderRadius:7, padding:"6px 12px", cursor:"pointer", fontSize:12, fontWeight:600 }}>↓ JSON</button>
               <button onClick={exportCSV}  title="Export action items to CSV"     style={{ background:"#1E293B", color:"#94A3B8", border:"1px solid #334155", borderRadius:7, padding:"6px 12px", cursor:"pointer", fontSize:12, fontWeight:600 }}>↓ CSV</button>
@@ -377,6 +566,9 @@
               <input type="file" accept=".json" ref={importRef} onChange={handleImport} style={{ display:"none" }} />
 
               <div style={{ width:1, height:24, background:"#1E293B" }} />
+              <button onClick={() => setPeopleModal(true)} style={{ background:"#1E293B", color:"#94A3B8", border:"1.5px solid #334155", borderRadius:8, padding:"7px 14px", cursor:"pointer", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", gap:6 }}>
+                👥 People
+              </button>
               <button onClick={() => setTaskModal("new")} style={{ background:"#1D4ED8", color:"#fff", border:"none", borderRadius:8, padding:"7px 16px", cursor:"pointer", fontSize:13, fontWeight:700, display:"flex", alignItems:"center", gap:6 }}>
                 <span style={{ fontSize:16, lineHeight:1 }}>+</span> Action Item
               </button>
@@ -423,7 +615,7 @@
                           </div>
                           <div style={{ display:"flex", alignItems:"center", gap:16 }}>
                             <div style={{ display:"flex", gap:8 }}>
-                              {p.owners.map(o => (
+                              {(pillarOwners[p.id]||[]).map(o => (
                                 <div key={o} style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(255,255,255,0.15)", borderRadius:20, padding:"4px 10px 4px 4px" }}>
                                   <Avatar name={o} size={20} />
                                   <span style={{ fontSize:12, color:"#fff", fontWeight:600 }}>{o.split(" ")[0]}</span>
@@ -566,7 +758,7 @@
                 <div style={{ display:"flex", gap:10, marginBottom:18, flexWrap:"wrap" }}>
                   {[
                     [filterPillar, setFilterPillar, [["all","All Pillars"],...PILLARS.map(p=>[p.id,p.label])]],
-                    [filterOwner,  setFilterOwner,  [["all","All Owners"],...ALL_OWNERS.map(o=>[o,o])]],
+                    [filterOwner,  setFilterOwner,  [["all","All Owners"],...owners.map(o=>[o,o])]],
                     [filterStatus, setFilterStatus, [["all","All Statuses"],...STATUSES.map(s=>[s,s])]],
                   ].map(([val,setter,opts],i) => (
                     <select key={i} value={val} onChange={e => setter(e.target.value)} style={{ border:"1.5px solid #E2E8F0", borderRadius:8, padding:"8px 12px", fontSize:13, color:"#475569", background:"#fff", cursor:"pointer" }}>
@@ -630,7 +822,7 @@
                   <div style={{ marginTop:24 }}>
                     <h2 style={{ margin:"0 0 14px", fontSize:16, fontWeight:800, color:"#0F172A" }}>Owner Summary</h2>
                     <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:12 }}>
-                      {ALL_OWNERS.map(owner => {
+                      {owners.map(owner => {
                         const ot = tasks.filter(t=>t.owner===owner);
                         if (!ot.length) return null;
                         return (
@@ -656,7 +848,8 @@
             )}
           </div>
 
-          {taskModal    && <TaskModal    task={taskModal==="new"?null:taskModal}       onSave={saveTask}    onClose={() => setTaskModal(null)} />}
+          {peopleModal  && <PeopleModal owners={owners} pillarOwners={pillarOwners} onSave={savePeople} onClose={() => setPeopleModal(false)} />}
+          {taskModal    && <TaskModal    task={taskModal==="new"?null:taskModal} allOwners={owners} onSave={saveTask}    onClose={() => setTaskModal(null)} />}
           {sessionModal && <SessionModal session={sessionModal==="new"?null:sessionModal} nextId={nextSessionId} onSave={saveSession} onClose={() => setSessionModal(null)} />}
 
           {deleteTaskId && (
@@ -665,7 +858,7 @@
                 <p style={{ margin:"0 0 6px", fontSize:16, fontWeight:700, color:"#0F172A" }}>Delete this action item?</p>
                 <p style={{ margin:"0 0 20px", fontSize:13, color:"#64748B" }}>This cannot be undone.</p>
                 <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
-                  <button onClick={() => { setTasks(t=>t.filter(x=>x.id!==deleteTaskId)); setDeleteTaskId(null); }} style={{ background:"#EF4444", color:"#fff", border:"none", borderRadius:9, padding:"10px 24px", fontWeight:700, cursor:"pointer" }}>Delete</button>
+                  <button onClick={() => deleteTask(deleteTaskId)} style={{ background:"#EF4444", color:"#fff", border:"none", borderRadius:9, padding:"10px 24px", fontWeight:700, cursor:"pointer" }}>Delete</button>
                   <button onClick={() => setDeleteTaskId(null)} style={{ border:"1.5px solid #E2E8F0", borderRadius:9, padding:"10px 20px", background:"#fff", cursor:"pointer", color:"#475569" }}>Cancel</button>
                 </div>
               </div>
@@ -677,7 +870,7 @@
                 <p style={{ margin:"0 0 6px", fontSize:16, fontWeight:700, color:"#0F172A" }}>Delete this session?</p>
                 <p style={{ margin:"0 0 20px", fontSize:13, color:"#64748B" }}>All session notes will be lost.</p>
                 <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
-                  <button onClick={() => { setSessions(s=>s.filter(x=>x.id!==deleteSessionId)); setDeleteSessionId(null); }} style={{ background:"#EF4444", color:"#fff", border:"none", borderRadius:9, padding:"10px 24px", fontWeight:700, cursor:"pointer" }}>Delete</button>
+                  <button onClick={() => deleteSession(deleteSessionId)} style={{ background:"#EF4444", color:"#fff", border:"none", borderRadius:9, padding:"10px 24px", fontWeight:700, cursor:"pointer" }}>Delete</button>
                   <button onClick={() => setDeleteSessionId(null)} style={{ border:"1.5px solid #E2E8F0", borderRadius:9, padding:"10px 20px", background:"#fff", cursor:"pointer", color:"#475569" }}>Cancel</button>
                 </div>
               </div>
