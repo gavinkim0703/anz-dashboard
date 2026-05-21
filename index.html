@@ -50,31 +50,31 @@
       try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; } catch(e) { return null; }
     }
 
-    // ─── SharePoint REST API ─────────────────────────────────────────────────────
-    const SP_SITE    = 'https://sap.sharepoint.com/teams/ANZFortnightlyCadence';
-    const SP_FILE_ID = '6fb1d590-1b0e-4866-afab-2e91918df428';
+    // ─── GitHub API ──────────────────────────────────────────────────────────────
+    const GH_TOKEN = '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';
+    const GH_API   = 'https://github.wdf.sap.corp/api/v3/repos/I749822/ANZ-Cadence-Dashboard/contents/data.json';
 
-    async function spRead() {
-      const r = await fetch(`${SP_SITE}/_api/web/GetFileById('${SP_FILE_ID}')/$value`, {
-        credentials: 'include', headers: { Accept: 'application/json' }
+    async function ghRead() {
+      const r = await fetch(GH_API, {
+        headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' }
       });
       if (!r.ok) throw new Error(r.status);
-      return r.json();
+      const j = await r.json();
+      const bytes = Uint8Array.from(atob(j.content.replace(/\n/g,'')), c => c.charCodeAt(0));
+      return { data: JSON.parse(new TextDecoder('utf-8').decode(bytes)), sha: j.sha };
     }
-    async function spWrite(data) {
-      const dr = await fetch(`${SP_SITE}/_api/contextinfo`, {
-        method: 'POST', credentials: 'include',
-        headers: { Accept: 'application/json;odata=verbose', 'Content-Type': 'application/json;odata=verbose' }
-      });
-      if (!dr.ok) throw new Error('digest ' + dr.status);
-      const dj = await dr.json();
-      const digest = dj.d.GetContextWebInformation.FormDigestValue;
-      const r = await fetch(`${SP_SITE}/_api/web/GetFileById('${SP_FILE_ID}')/$value`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'X-RequestDigest': digest, 'X-HTTP-Method': 'PUT', 'Content-Type': 'application/json' },
-        body: JSON.stringify(data, null, 2)
+    async function ghWrite(data, sha) {
+      const body = JSON.stringify(data, null, 2);
+      const bytes = new TextEncoder().encode(body);
+      const encoded = btoa(String.fromCharCode(...bytes));
+      const r = await fetch(GH_API, {
+        method: 'PUT',
+        headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Dashboard update', content: encoded, sha })
       });
       if (!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      return j.content.sha;
     }
 
     // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -320,6 +320,7 @@
       const importRef   = useRef(null);
       const [syncStatus, setSyncStatus] = useState('loading');
       const latestRef   = useRef(null);
+      const shaRef      = useRef(null);
       const [owners,       setOwners]       = useState(DEFAULT_OWNERS);
       const [pillarOwners, setPillarOwners] = useState(DEFAULT_PILLAR_OWNERS);
       const [peopleModal,  setPeopleModal]  = useState(false);
@@ -327,7 +328,7 @@
       useEffect(() => {
         (async () => {
           let data = null;
-          try { data = await spRead(); } catch(e) {}
+          try { const r = await ghRead(); shaRef.current = r.sha; data = r.data; } catch(e) {}
           if (!data) {
             try {
               const res = await fetch('./data.json?t=' + Date.now());
@@ -368,10 +369,11 @@
         if (!ready) return;
         const poll = async () => {
           try {
-            const remote = await spRead();
+            const { data: remote, sha } = await ghRead();
+            shaRef.current = sha;
             if (!remote || typeof remote !== 'object') return;
             const cur = JSON.stringify(latestRef.current);
-            const inc = JSON.stringify({ tasks: remote.tasks, sessions: remote.sessions, nextTaskId: remote.nextTaskId, nextSessionId: remote.nextSessionId });
+            const inc = JSON.stringify({ tasks: remote.tasks, sessions: remote.sessions, nextTaskId: remote.nextTaskId, nextSessionId: remote.nextSessionId, owners: remote.owners, pillarOwners: remote.pillarOwners });
             if (cur !== inc) {
               if (Array.isArray(remote.tasks))    setTasks(remote.tasks);
               if (Array.isArray(remote.sessions)) setSessions(remote.sessions);
@@ -387,9 +389,19 @@
         return () => clearInterval(id);
       }, [ready]);
 
-      const writeToSP = (data) => {
+      const writeToGH = async (data) => {
         setSyncStatus('syncing');
-        spWrite(data).then(() => setSyncStatus('synced')).catch(() => setSyncStatus('error'));
+        try {
+          if (!shaRef.current) { const r = await ghRead(); shaRef.current = r.sha; }
+          const newSha = await ghWrite(data, shaRef.current);
+          shaRef.current = newSha;
+          setSyncStatus('synced');
+        } catch(e) {
+          if (e.message === '409') {
+            try { const r = await ghRead(); shaRef.current = r.sha; const s = await ghWrite(data, shaRef.current); shaRef.current = s; setSyncStatus('synced'); }
+            catch(e2) { setSyncStatus('error'); }
+          } else { setSyncStatus('error'); }
+        }
       };
 
       // ── Export / Import ──────────────────────────────────────────────────────────
@@ -462,7 +474,7 @@
           setTasks(newTasks);
         }
         setTaskModal(null);
-        writeToSP({ tasks: newTasks, sessions, nextTaskId: newNextTaskId, nextSessionId, owners, pillarOwners });
+        writeToGH({ tasks: newTasks, sessions, nextTaskId: newNextTaskId, nextSessionId, owners, pillarOwners });
       };
 
       const saveSession = (form) => {
@@ -478,28 +490,28 @@
           setSessions(newSessions);
         }
         setSessionModal(null);
-        writeToSP({ tasks, sessions: newSessions, nextTaskId, nextSessionId: newNextSessId, owners, pillarOwners });
+        writeToGH({ tasks, sessions: newSessions, nextTaskId, nextSessionId: newNextSessId, owners, pillarOwners });
       };
 
       const deleteTask = (id) => {
         const newTasks = tasks.filter(x => x.id !== id);
         setTasks(newTasks);
         setDeleteTaskId(null);
-        writeToSP({ tasks: newTasks, sessions, nextTaskId, nextSessionId, owners, pillarOwners });
+        writeToGH({ tasks: newTasks, sessions, nextTaskId, nextSessionId, owners, pillarOwners });
       };
 
       const savePeople = (newOwners, newPillarOwners) => {
         setOwners(newOwners);
         setPillarOwners(newPillarOwners);
         setPeopleModal(false);
-        writeToSP({ tasks, sessions, nextTaskId, nextSessionId, owners: newOwners, pillarOwners: newPillarOwners });
+        writeToGH({ tasks, sessions, nextTaskId, nextSessionId, owners: newOwners, pillarOwners: newPillarOwners });
       };
 
       const deleteSession = (id) => {
         const newSessions = sessions.filter(x => x.id !== id);
         setSessions(newSessions);
         setDeleteSessionId(null);
-        writeToSP({ tasks, sessions: newSessions, nextTaskId, nextSessionId, owners, pillarOwners });
+        writeToGH({ tasks, sessions: newSessions, nextTaskId, nextSessionId, owners, pillarOwners });
       };
 
       const filteredTasks = tasks.filter(t =>
